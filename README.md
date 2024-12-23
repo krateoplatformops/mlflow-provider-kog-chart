@@ -1,4 +1,4 @@
-# MlFlow Provider Chart
+# MLFlow Provider Chart
 
 This Helm chart provides a template for deploying an application that utilizes OpenAPI Specifications (OAS). It includes ConfigMaps to store the OAS content, a Deployment to run the application, and a Service to expose it.
 
@@ -30,7 +30,9 @@ my-helm-chart
 To install the chart, use the following command:
 
 ```
-helm install <release-name> ./my-helm-chart
+helm repo add krateo https://charts.krateo.io
+helm repo update krateo
+helm install krateo-core-provider krateo/mlflow-provider
 ```
 
 Replace `<release-name>` with your desired release name.

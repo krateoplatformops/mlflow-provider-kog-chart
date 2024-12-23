@@ -1,0 +1,9 @@
+openapi:
+  serverUrl: "http://localhost:8080"
+
+webservice:
+  service:
+    port: 8081
+  image:
+    tag: 0.0.2
+
