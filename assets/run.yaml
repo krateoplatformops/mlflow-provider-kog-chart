@@ -1,0 +1,219 @@
+openapi: 3.0.0
+info:
+  title: MLflow Run API
+  version: 1.0.0
+servers:
+  - url: {{ .Values.openapi.serverUrl }}
+paths:
+  /2.0/mlflow/runs/create:
+    post:
+      summary: Create a new run within an experiment.
+      description: Create a new run within an experiment. A run is usually a single execution of a machine learning or data ETL pipeline. MLflow uses runs to track Param, Metric, and RunTag associated with a single execution.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - experiment_id
+              properties:
+                experiment_id:
+                  type: string
+                  description: ID of the associated experiment.
+                user_id:
+                  type: string
+                  description: ID of the user executing the run. This field is deprecated as of MLflow 1.0, and will be removed in a future MLflow release. Use ‘mlflow.user’ tag instead.
+                run_name:
+                  type: string
+                  description: Name of the run.
+                start_time:
+                  type: integer
+                  format: int64
+                  description: Unix timestamp in milliseconds of when the run started.
+                tags:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RunTag'
+      responses:
+        '200':
+          description: Run created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run:
+                    $ref: '#/components/schemas/Run'
+  /2.0/mlflow/runs/delete:
+    post:
+      summary: Mark a run for deletion.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - run_id
+              properties:
+                run_id:
+                  type: string
+                  description: ID of the run to delete. This field is required.
+      responses:
+        '200':
+          description: Run deleted successfully
+  /2.0/mlflow/runs/restore:
+    post:
+      summary: Restore a deleted run.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - run_id
+              properties:
+                run_id:
+                  type: string
+                  description: ID of the run to restore. This field is required.
+      responses:
+        '200':
+          description: Run restored successfully
+  /2.0/mlflow/runs/get:
+    get:
+      servers:
+        - url: {{ include "mlflow.webServiceUrl" . }}
+      summary: Get metadata, metrics, params, and tags for a run.
+      parameters:
+        - name: run_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ID of the run to fetch. Must be provided.
+        - name: run_uuid
+          in: query
+          schema:
+            type: string
+          description: "[Deprecated, use run_id instead] ID of the run to fetch. This field will be removed in a future MLflow version."
+      responses:
+        '200':
+          description: Run retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run:
+                    $ref: '#/components/schemas/Run'
+components:
+  schemas:
+    Run:
+      type: object
+      properties:
+        info:
+          $ref: '#/components/schemas/RunInfo'
+        data:
+          $ref: '#/components/schemas/RunData'
+        inputs:
+          $ref: '#/components/schemas/RunInputs'
+    RunData:
+      type: object
+      properties:
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        params:
+          type: array
+          items:
+            $ref: '#/components/schemas/Param'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunTag'
+    RunInfo:
+      type: object
+      properties:
+        run_id:
+          type: string
+          description: Unique identifier for the run.
+        run_uuid:
+          type: string
+          description: "[Deprecated, use run_id instead] Unique identifier for the run. This field will be removed in a future MLflow version."
+        run_name:
+          type: string
+          description: The name of the run.
+        experiment_id:
+          type: string
+          description: The experiment ID.
+        user_id:
+          type: string
+          description: User who initiated the run. This field is deprecated as of MLflow 1.0, and will be removed in a future MLflow release. Use ‘mlflow.user’ tag instead.
+        status:
+          type: string
+          description: Current status of the run.
+        start_time:
+          type: integer
+          format: int64
+          description: Unix timestamp of when the run started in milliseconds.
+        end_time:
+          type: integer
+          format: int64
+          description: Unix timestamp of when the run ended in milliseconds.
+        artifact_uri:
+          type: string
+          description: URI of the directory where artifacts should be uploaded.
+        lifecycle_stage:
+          type: string
+          description: "Current life cycle stage of the experiment : OneOf(“active”, “deleted”)"
+    RunInputs:
+      type: object
+      properties:
+        dataset_inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetInput'
+    RunTag:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The tag key.
+        value:
+          type: string
+          description: The tag value.
+    Metric:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The metric key.
+        value:
+          type: number
+          format: float
+          description: The metric value.
+        timestamp:
+          type: integer
+          format: int64
+          description: The timestamp of the metric.
+    Param:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The parameter key.
+        value:
+          type: string
+          description: The parameter value.
+    DatasetInput:
+      type: object
+      properties:
+        dataset_id:
+          type: string
+          description: The dataset ID.
+        dataset_name:
+          type: string
+          description: The dataset name.

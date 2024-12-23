@@ -1,0 +1,25 @@
+kind: RestDefinition
+apiVersion: swaggergen.krateo.io/v1alpha1
+metadata:
+  name: {{ .Release.Name }}-experiments
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-experiments/experiment.yaml
+  resourceGroup: mlflow.krateo.io
+  resource: 
+    kind: Experiment
+    identifiers:
+      - experiment_id # This is the field that will be used as the identifier
+      - name
+    verbsDescription:
+    - action: create
+      method: POST
+      path: /2.0/mlflow/experiments/create
+    - action: delete
+      method: POST
+      path: /2.0/mlflow/experiments/delete
+    - action: get
+      method: GET
+      path: /2.0/mlflow/experiments/get
+    - action: update
+      method: POST
+      path: /2.0/mlflow/experiments/update

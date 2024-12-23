@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: MLflow Metrics API
+  version: 1.0.0
+servers:
+  - url: {{ .Values.openapi.serverUrl }}
+paths:
+  /2.0/mlflow/metrics/get-history:
+    get:
+      summary: Get a list of all values for the specified metric for a given run.
+      description: Get a list of all values for the specified metric for a given run.
+      parameters:
+        - name: run_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ID of the run from which to fetch metric values. Must be provided.
+        - name: run_uuid
+          in: query
+          schema:
+            type: string
+          description: "[Deprecated, use run_id instead] ID of the run from which to fetch metric values. This field will be removed in a future MLflow version."
+        - name: metric_key
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Name of the metric. This field is required.
+        - name: page_token
+          in: query
+          schema:
+            type: string
+          description: Token indicating the page of metric history to fetch.
+        - name: max_results
+          in: query
+          schema:
+            type: integer
+            format: int32
+          description: Maximum number of logged instances of a metric for a run to return per call.
+      responses:
+        '200':
+          description: Metric history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metrics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Metric'
+                  next_page_token:
+                    type: string
+                    description: Token that can be used to issue a query for the next page of metric history values. A missing token indicates that no additional metrics are available to fetch.
+components:
+  schemas:
+    Metric:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Key identifying this metric.
+        value:
+          type: number
+          format: double
+          description: Value associated with this metric.
+        timestamp:
+          type: integer
+          format: int64
+          description: The timestamp at which this metric was recorded.
+        step:
+          type: integer
+          format: int64
+          description: Step at which to log the metric.

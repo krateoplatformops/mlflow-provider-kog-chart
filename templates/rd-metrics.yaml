@@ -1,0 +1,17 @@
+kind: RestDefinition
+apiVersion: swaggergen.krateo.io/v1alpha1
+metadata:
+  name: {{ .Release.Name }}-metrics
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-metrics/metrics.yaml
+  resourceGroup: mlflow.krateo.io
+  resource: 
+    kind: Metric
+    identifiers:
+      - run_id # This is the field that will be used as the identifier
+      - metric_key
+      - metrics
+    verbsDescription:
+    - action: get
+      method: GET
+      path: /2.0/mlflow/metrics/get-history

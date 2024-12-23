@@ -1,0 +1,197 @@
+openapi: 3.0.0
+info:
+  title: MLflow Registered Models API
+  version: 1.0.0
+servers:
+- url: {{ .Values.openapi.serverUrl }}
+paths:
+  /2.0/mlflow/registered-models/search:
+    get:
+      summary: Search Registered Models
+      operationId: searchRegisteredModels
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            String filter condition, like “name LIKE ‘my-model-name’”. Interpreted in the backend automatically as “name LIKE ‘%my-model-name%’”. Single boolean condition, with string values wrapped in single quotes.
+        - name: max_results
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 100
+          description: Maximum number of models desired. Default is 100. Max threshold is 1000.
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            List of columns for ordering search results, which can include model name and last updated timestamp with an optional “DESC” or “ASC” annotation, where “ASC” is the default. Tiebreaks are done by model name ASC.
+        - name: page_token
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Pagination token to go to the next page based on a previous search query.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  registered_models:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RegisteredModel'
+                  next_page_token:
+                    type: string
+  /2.0/mlflow/registered-models/get:
+    get:
+      servers:
+        - url: {{ include "mlflow.webServiceUrl" . }}
+      summary: Get metadata for a registered model
+      description: Get metadata for a registered model
+      operationId: get-registered-model
+      parameters:
+      - name: name
+        in: query
+        description: Registered model unique name identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisteredModel'
+components:
+  schemas:
+    RegisteredModel:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Unique name for the model.
+        creation_timestamp:
+          type: integer
+          format: int64
+          description: Timestamp recorded when this registered_model was created.
+        last_updated_timestamp:
+          type: integer
+          format: int64
+          description: Timestamp recorded when metadata for this registered_model was last updated.
+        user_id:
+          type: string
+          description: "User that created this registered_model NOTE: this field is not currently returned."
+        description:
+          type: string
+          description: Description of this registered_model.
+        latest_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelVersion'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegisteredModelTag'
+        aliases:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegisteredModelAlias'
+    ModelVersion:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Unique name of the model.
+        version:
+          type: string
+          description: Model’s version number.
+        creation_timestamp:
+          type: integer
+          format: int64
+          description: Timestamp recorded when this model_version was created.
+        last_updated_timestamp:
+          type: integer
+          format: int64
+          description: Timestamp recorded when metadata for this model_version was last updated.
+        user_id:
+          type: string
+          description: User that created this model_version.
+        current_stage:
+          type: string
+          description: Current stage for this model_version.
+        description:
+          type: string
+          description: Description of this model_version.
+        source:
+          type: string
+          description: URI indicating the location of the source model artifacts, used when creating model_version.
+        run_id:
+          type: string
+          description: MLflow run ID used when creating model_version, if source was generated by an experiment run stored in MLflow tracking server.
+        status:
+          $ref: '#/components/schemas/ModelVersionStatus'
+        status_message:
+          type: string
+          description: Details on current status, if it is pending or failed.
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelVersionTag'
+        run_link:
+          type: string
+          description: >
+            Run Link: Direct link to the run that generated this version. This field is set at model version creation time only for model versions whose source run is from a tracking server that is different from the registry server.
+        aliases:
+          type: array
+          items:
+            type: string
+    ModelVersionStatus:
+      type: string
+      enum:
+        - PENDING_REGISTRATION
+        - FAILED_REGISTRATION
+        - READY
+      description: >
+        - PENDING_REGISTRATION: Request to register a new model version is pending as server performs background tasks.
+        - FAILED_REGISTRATION: Request to register a new model version has failed.
+        - READY: Model version is ready for use.
+    ModelVersionTag:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The tag key.
+        value:
+          type: string
+          description: The tag value.
+    RegisteredModelTag:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The tag key.
+        value:
+          type: string
+          description: The tag value.
+    RegisteredModelAlias:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The alias key.
+        value:
+          type: string
+          description: The alias value.

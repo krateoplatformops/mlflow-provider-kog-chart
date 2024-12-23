@@ -1,0 +1,22 @@
+kind: RestDefinition
+apiVersion: swaggergen.krateo.io/v1alpha1
+metadata:
+  name: {{ .Release.Name }}-runs
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-runs/run.yaml
+  resourceGroup: mlflow.krateo.io
+  resource: 
+    kind: Run
+    identifiers:
+      - run_id # This is the field that will be used as the identifier
+      - run_name
+    verbsDescription:
+    - action: create
+      method: POST
+      path: /2.0/mlflow/runs/create
+    - action: delete
+      method: POST
+      path: /2.0/mlflow/runs/delete
+    - action: get
+      method: GET
+      path: /2.0/mlflow/runs/get

@@ -1,0 +1,225 @@
+openapi: 3.0.0
+info:
+  title: MLflow Experiment API
+  version: 1.0.0
+servers:
+  - url: {{ .Values.openapi.serverUrl }}
+paths:
+  /2.0/mlflow/experiments/create:
+    post:
+      summary: Create an experiment with a name.
+      description: Returns the ID of the newly created experiment. Validates that another experiment with the same name does not already exist and fails if another experiment with the same name already exists. Throws RESOURCE_ALREADY_EXISTS if an experiment with the given name exists.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Experiment name. This field is required.
+                artifact_location:
+                  type: string
+                  description: Location where all artifacts for the experiment are stored. If not provided, the remote server will select an appropriate default.
+                tags:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ExperimentTag'
+      responses:
+        '200':
+          description: Experiment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  experiment_id:
+                    type: string
+                    description: Unique identifier for the experiment.
+  /2.0/mlflow/experiments/search:
+    post:
+      summary: Search experiments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                max_results:
+                  type: integer
+                  format: int64
+                  description: Maximum number of experiments desired.
+                page_token:
+                  type: string
+                  description: Token indicating the page of experiments to fetch.
+                filter:
+                  type: string
+                  description: A filter expression over experiment attributes and tags.
+                order_by:
+                  type: array
+                  items:
+                    type: string
+                  description: List of columns for ordering search results.
+                view_type:
+                  type: string
+                  description: Qualifier for type of experiments to be returned.
+      responses:
+        '200':
+          description: Experiments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  experiments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Experiment'
+                  next_page_token:
+                    type: string
+                    description: Token that can be used to retrieve the next page of experiments.
+  /2.0/mlflow/experiments/get:
+    get:
+      servers:
+        - url: {{ include "mlflow.webServiceUrl" . }}
+      summary: Get metadata for an experiment
+      parameters:
+        - name: experiment_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ID of the associated experiment.
+      responses:
+        '200':
+          description: Experiment retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  experiment:
+                    $ref: '#/components/schemas/Experiment'
+  /2.0/mlflow/experiments/get-by-name:
+    get:
+      summary: Get metadata for an experiment by name
+      parameters:
+        - name: experiment_name
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Name of the associated experiment.
+      responses:
+        '200':
+          description: Experiment retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  experiment:
+                    $ref: '#/components/schemas/Experiment'
+  /2.0/mlflow/experiments/delete:
+    post:
+      summary: Mark an experiment and associated metadata for deletion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - experiment_id
+              properties:
+                experiment_id:
+                  type: string
+                  description: ID of the associated experiment. This field is required.
+      responses:
+        '200':
+          description: Experiment deleted successfully
+  /2.0/mlflow/experiments/restore:
+    post:
+      summary: Restore an experiment marked for deletion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - experiment_id
+              properties:
+                experiment_id:
+                  type: string
+                  description: ID of the associated experiment. This field is required.
+      responses:
+        '200':
+          description: Experiment restored successfully
+  /2.0/mlflow/experiments/update:
+    post:
+      summary: Update experiment metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - experiment_id
+              properties:
+                experiment_id:
+                  type: string
+                  description: ID of the associated experiment. This field is required.
+                new_name:
+                  type: string
+                  description: If provided, the experiment’s name is changed to the new name. The new name must be unique.
+      responses:
+        '200':
+          description: Experiment updated successfully
+components:
+  schemas:
+    Experiment:
+      type: object
+      properties:
+        experiment_id:
+          type: string
+          description: Unique identifier for the experiment.
+        name:
+          type: string
+          description: Human readable name that identifies the experiment.
+        artifact_location:
+          type: string
+          description: Location where artifacts for the experiment are stored.
+        lifecycle_stage:
+          type: string
+          description: "Current life cycle stage of the experiment: “active” or “deleted”."
+        last_update_time:
+          type: integer
+          format: int64
+          description: Last update time.
+        creation_time:
+          type: integer
+          format: int64
+          description: Creation time.
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExperimentTag'
+    ExperimentTag:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The tag key.
+        value:
+          type: string
+          description: The tag value.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
