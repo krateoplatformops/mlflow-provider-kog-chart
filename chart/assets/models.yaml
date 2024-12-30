@@ -76,6 +76,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/RegisteredModel'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
   schemas:
     RegisteredModel:
       type: object

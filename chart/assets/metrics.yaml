@@ -54,6 +54,10 @@ paths:
                     type: string
                     description: Token that can be used to issue a query for the next page of metric history values. A missing token indicates that no additional metrics are available to fetch.
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
   schemas:
     Metric:
       type: object
