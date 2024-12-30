@@ -7,6 +7,8 @@ servers:
 paths:
   /2.0/mlflow/runs/create:
     post:
+      servers:
+        - url: {{ include "mlflow.webServiceUrl" . }}
       summary: Create a new run within an experiment.
       description: Create a new run within an experiment. A run is usually a single execution of a machine learning or data ETL pipeline. MLflow uses runs to track Param, Metric, and RunTag associated with a single execution.
       requestBody:
