@@ -109,6 +109,10 @@ paths:
                   run:
                     $ref: '#/components/schemas/Run'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
   schemas:
     Run:
       type: object
