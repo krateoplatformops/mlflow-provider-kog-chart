@@ -32,7 +32,7 @@ To install the chart, use the following command:
 ```
 helm repo add krateo https://charts.krateo.io
 helm repo update krateo
-helm install krateo-core-provider krateo/mlflow-provider
+helm install krateo-core-provider krateo/mlflow-provider-kog
 ```
 
 Replace `<release-name>` with your desired release name.
