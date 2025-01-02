@@ -1,4 +1,4 @@
-name: mlflow-provider
+name: mlflow-provider-kog
 version: CHART_VERSION
 description: A Helm chart for deploying an application with OpenAPI Specification
 type: application
