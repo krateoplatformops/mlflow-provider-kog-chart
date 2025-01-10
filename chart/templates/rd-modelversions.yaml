@@ -9,6 +9,7 @@ spec:
     kind: ModelVersion
     identifiers:
       - name
+      - version
     verbsDescription:
     - action: create
       method: POST
