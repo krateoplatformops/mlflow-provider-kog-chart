@@ -1,0 +1,18 @@
+kind: RestDefinition
+apiVersion: swaggergen.krateo.io/v1alpha1
+metadata:
+  name: {{ .Release.Name }}-modelversions
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-modelversions/modelversions.yaml
+  resourceGroup: mlflow.krateo.io
+  resource: 
+    kind: ModelVersion
+    identifiers:
+      - name
+    verbsDescription:
+    - action: create
+      method: POST
+      path: /2.0/mlflow/model-versions/create
+    - action: get
+      method: GET
+      path: /2.0/mlflow/model-versions/get

@@ -5,6 +5,41 @@ info:
 servers:
 - url: {{ .Values.openapi.serverUrl }}
 paths:
+  /2.0/mlflow/registered-models/create:
+    post:
+      summary: Create Registered Model
+      operationId: createRegisteredModel
+      requestBody:
+        description: Create a new registered model
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Register models under this name. This field is required.
+                tags:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RegisteredModelTag'
+                  description: Additional metadata for registered model.
+                description:
+                  type: string
+                  description: Optional description for registered model.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  registered_model:
+                    $ref: '#/components/schemas/RegisteredModel'
+        '409':
+          description: RESOURCE_ALREADY_EXISTS if a registered model with the given name exists
   /2.0/mlflow/registered-models/search:
     get:
       summary: Search Registered Models

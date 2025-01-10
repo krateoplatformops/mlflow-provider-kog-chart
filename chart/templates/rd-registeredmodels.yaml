@@ -2,7 +2,6 @@ kind: RestDefinition
 apiVersion: swaggergen.krateo.io/v1alpha1
 metadata:
   name: {{ .Release.Name }}-registeredmodels
-  # name: mlflow-models
 spec:
   oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-registeredmodels/models.yaml
   resourceGroup: mlflow.krateo.io
@@ -14,3 +13,6 @@ spec:
     - action: get
       method: GET
       path: /2.0/mlflow/registered-models/get
+    - action: create
+      method: POST
+      path: /2.0/mlflow/registered-models/create
